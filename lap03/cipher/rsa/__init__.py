@@ -1,1 +1,1 @@
-from .rsa_cipher import RSACipher
+from cipher.rsa.rsa_cipher import RSACipher
