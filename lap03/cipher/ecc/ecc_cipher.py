@@ -1,16 +1,15 @@
-import ecdsa
-import os
+import ecdsa, os
 
 if not os.path.exists('cipher/ecc/keys'):
     os.makedirs('cipher/ecc/keys')
 
-class ECCCipher:
+class ECCipher:
     def __init__(self):
         pass
 
     def generate_keys(self):
-        sk = ecdsa.SigningKey.generate()
-        vk = sk.get_verifying_key()
+        sk = ecdsa.SigningKey.generate() #Tao khoa rieng tu
+        vk = sk.get_verifying_key() #Tao khoa cong khai tu khoa rieng tu
 
         with open('cipher/ecc/keys/privateKey.pem', 'wb') as p:
             p.write(sk.to_pem())
@@ -27,12 +26,12 @@ class ECCCipher:
 
         return sk, vk
 
-    def sign(self, message, key):
-        return key.sign(message.encode('ascii'))
+    def sign(self, message, sk):
+        return sk.sign(message.encode('ascii')) #Ky du lieu bang khoa rieng tu
 
     def verify(self, message, signature, key):
-        vk, _ = self.load_keys()
-        try:
-            return vk.verify(signature, message.encode('ascii'))
+        _, vk = self.load_keys()
+        try:    
+            return vk.verify(signature, message.encode('ascii')) #Xac thuc chu ky
         except ecdsa.BadSignatureError:
             return False

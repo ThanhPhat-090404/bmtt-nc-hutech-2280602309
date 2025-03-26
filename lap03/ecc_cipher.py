@@ -1,4 +1,4 @@
-import sys
+import sys  
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from ui.ecc import Ui_MainWindow
 import requests
@@ -8,9 +8,9 @@ class MyApp(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.ui.btn_generate_keys.clicked.connect(self.call_api_gen_keys)  # Đổi btn_GenerateKeys -> btn_generate_keys
-        self.ui.btn_sign.clicked.connect(self.call_api_sign)  # Đổi btn_Sign -> btn_sign
-        self.ui.btn_verify.clicked.connect(self.call_api_verify)  # Giữ nguyên btn_verify
+        self.ui.btn_GenerateKeys.clicked.connect(self.call_api_gen_keys)
+        self.ui.btn_Sign.clicked.connect(self.call_api_sign)
+        self.ui.btn_verify.clicked.connect(self.call_api_verify)
 
     def call_api_gen_keys(self):
         url = 'http://127.0.0.1:5000/api/ecc/generate_keys'
@@ -25,18 +25,18 @@ class MyApp(QMainWindow):
             else:
                 print('Error while calling API')
         except requests.exceptions.RequestException as e:
-            print('Error:', str(e))
+            print('Error: %s' % e.message)
 
     def call_api_sign(self):      
         url = 'http://127.0.0.1:5000/api/ecc/sign'
         payload = {
-            'message': self.ui.txt_information.toPlainText()  # Đổi txt_plain_text -> txt_information
+            'message': self.ui.txt_information.toPlainText()
         }
         try:
             response = requests.post(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
-                self.ui.txt_signature.setPlainText(data['signature'])  # Đổi txt_cipher_text -> txt_signature
+                self.ui.txt_signature.setPlainText(data['signature'])
 
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
@@ -45,26 +45,32 @@ class MyApp(QMainWindow):
             else:
                 print('Error while calling API')
         except requests.exceptions.RequestException as e:
-            print('Error:', str(e))
+            print('Error: %s' % e.message)
     
     def call_api_verify(self):
         url = 'http://127.0.0.1:5000/api/ecc/verify'
         payload = {
-            'message': self.ui.txt_information.toPlainText(),  # Đổi txt_plain_text -> txt_information
-            'signature': self.ui.txt_signature.toPlainText()  # Đổi txt_cipher_text -> txt_signature
+            'message': self.ui.txt_information.toPlainText(),
+            'signature': self.ui.txt_signature.toPlainText()
         }
         try:
             response = requests.post(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
-                msg = QMessageBox()
-                msg.setIcon(QMessageBox.Information)
-                msg.setText("Verified Successfully" if data["is_verified"] else "Verification Failed")
-                msg.exec_()
+                if(data["is_verified"]):
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Verified Successfully")
+                    msg.exec_()
+                else:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Verified Failed")
+                    msg.exec_()
             else:
                 print('Error while calling API')
         except requests.exceptions.RequestException as e:
-            print('Error:', str(e))
+            print('Error: %s' % e.message)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
